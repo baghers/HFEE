@@ -1,0 +1,464 @@
+
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0045/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0040/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0041/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0044/enable
+
+
+
+echo 1
+echo userspace >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+echo 2
+echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+echo 3
+echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+
+
+pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	echo 1
+else
+	./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/hmmer_base.ArmLinuxGnuAbi-  --num 50000 ./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/nph3.hmm &	
+fi
+sleep 1s
+pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+taskset -cp 4 $pid0
+while [ $pid0 -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 4 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="4':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+
+	pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} 	${A15_A} ${A15_W} -${pid0} hmmer ${s1} ${s2} ${instructions0b}" >> resmyth.log
+	sleep 1s
+
+done
+
+
+pid0="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	echo 1
+else
+	./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/bzip2_base.ArmLinuxGnuAbi- ./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/input.program & 	
+fi
+sleep 1s
+pid0="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+taskset -cp 4 $pid0
+while [ $pid0 -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 4 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="4':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+	pid0="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} 	${A15_A} ${A15_W} -${pid0} bzip2 ${s1} ${s2} ${instructions0b}" >> resmyth.log
+	sleep 1s
+
+done
+
+pid0="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	echo 1
+else
+	./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/mcf_base.ArmLinuxGnuAbi- ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.in -o ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.out -e ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.err & 	
+fi
+sleep 1s
+pid0="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+taskset -cp 4 $pid0
+while [ $pid0 -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 4 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="4':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+	pid0="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} 	${A15_A} ${A15_W} -${pid0} mcf ${s1} ${s2} ${instructions0b}" >> resmyth.log
+	sleep 1s
+
+done
+
+
+pid0="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	echo 1
+else
+	./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/h264ref_base.ArmLinuxGnuAbi- -d ./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/foreman_ref_encoder_main.cfg & 	
+fi
+sleep 1s
+pid0="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+taskset -cp 4 $pid0
+while [ $pid0 -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 4 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="4':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+	pid0="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} 	${A15_A} ${A15_W} -${pid0} h264ref ${s1} ${s2} ${instructions0b}" >> resmyth.log
+	sleep 1s
+
+done
+
+
+
+
+
+
+pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	echo 1
+else
+	./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/hmmer_base.ArmLinuxGnuAbi-  --num 50000 ./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/nph3.hmm &	
+fi
+sleep 1s
+pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+taskset -cp 0 $pid0
+while [ $pid0 -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 0 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="0':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+
+	pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} 	${A15_A} ${A15_W} -${pid0} hmmer ${s1} ${s2} ${instructions0b}" >> resmyth.log
+	sleep 1s
+
+done
+
+
+pid0="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	echo 1
+else
+	./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/bzip2_base.ArmLinuxGnuAbi- ./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/input.program & 	
+fi
+sleep 1s
+pid0="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+taskset -cp 0 $pid0
+while [ $pid0 -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 0 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="0':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+	pid0="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} 	${A15_A} ${A15_W} -${pid0} bzip2 ${s1} ${s2} ${instructions0b}" >> resmyth.log
+	sleep 1s
+
+done
+
+pid0="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	echo 1
+else
+	./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/mcf_base.ArmLinuxGnuAbi- ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.in -o ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.out -e ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.err & 	
+fi
+sleep 1s
+pid0="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+taskset -cp 0 $pid0
+while [ $pid0 -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 0 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="0':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+	pid0="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} 	${A15_A} ${A15_W} -${pid0} mcf ${s1} ${s2} ${instructions0b}" >> resmyth.log
+	sleep 1s
+
+done
+
+
+pid0="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	echo 1
+else
+	./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/h264ref_base.ArmLinuxGnuAbi- -d ./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/foreman_ref_encoder_main.cfg & 	
+fi
+sleep 1s
+pid0="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+taskset -cp 0 $pid0
+while [ $pid0 -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 0 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="0':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+	pid0="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} 	${A15_A} ${A15_W} -${pid0} h264ref ${s1} ${s2} ${instructions0b}" >> resmyth.log
+	sleep 1s
+
+done
+

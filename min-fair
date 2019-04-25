@@ -1,0 +1,561 @@
+
+
+
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0045/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0040/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0041/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0044/enable
+
+echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+echo 2
+echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+echo 3
+echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+echo 4
+cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq
+
+pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+pid1="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+pid2="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+pid3="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+
+#####################kill previous processes
+if [ $(echo ${#pid0}) -gt 0 ]
+then
+	kill $pid0
+fi
+if [ $(echo ${#pid1}) -gt 0 ]
+then
+	kill $pid1
+fi
+if [ $(echo ${#pid2}) -gt 0 ]
+then
+	kill $pid2
+fi
+if [ $(echo ${#pid3}) -gt 0 ]
+then
+	kill $pid3
+fi
+#####################
+	
+
+./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/hmmer_base.ArmLinuxGnuAbi-  --num 50000 ./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/nph3.hmm &	
+
+./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/bzip2_base.ArmLinuxGnuAbi- ./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/input.program & 
+
+./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/mcf_base.ArmLinuxGnuAbi- ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.in -o ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.out -e ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.err &
+
+./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/h264ref_base.ArmLinuxGnuAbi- -d ./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/foreman_ref_encoder_main.cfg & 
+
+pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+pid1="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+pid2="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+pid3="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+pcnt=4
+while [ $(echo ${#pcnt}) -gt 0 ]
+do
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	taskset -cp 2 $pid0
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 2 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0l=$(($(( $s2 - $s1 ))))
+	v0="2':"
+	rest0=${poutput#*$v0}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	instructions0l=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0l="$(echo "${instructions0l//,}")"
+	fi
+	
+	if [ $(echo ${#pid1}) -gt 0 ]
+	then
+	taskset -cp 3 $pid1
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 3 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF1l=$(($(( $s2 - $s1 ))))
+	v0="3':"
+	rest0=${poutput#*$v0}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	instructions1l=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions1l="$(echo "${instructions1l//,}")"
+	fi
+	
+	if [ $(echo ${#pid2}) -gt 0 ]
+	then
+	taskset -cp 6 $pid2
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 6 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF2b=$(($(( $s2 - $s1 ))))
+	v0="6':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions2b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions2b="$(echo "${instructions2b//,}")"
+	fi
+
+	if [ $(echo ${#pid3}) -gt 0 ]
+	then
+	taskset -cp 7 $pid3
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 7 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF3b=$(($(( $s2 - $s1 ))))
+	v0="7':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions3b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions3b="$(echo "${instructions3b//,}")"
+	fi
+
+	
+	if [ $(echo ${#pid2}) -gt 0 ]
+	then
+	taskset -cp 2 $pid2
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 2 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF2l=$(($(( $s2 - $s1 ))))
+	v0="2':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions2l=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions2l="$(echo "${instructions2l//,}")"
+	fi
+
+	if [ $(echo ${#pid3}) -gt 0 ]
+	then
+	taskset -cp 3 $pid3
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 3 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF3l=$(($(( $s2 - $s1 ))))
+	v0="3':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions3l=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions3l="$(echo "${instructions3l//,}")"
+	fi
+	
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+	taskset -cp 6 $pid0
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 6 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF0b=$(($(( $s2 - $s1 ))))
+	v0="6':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions0b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions0b="$(echo "${instructions0b//,}")"
+	fi
+	
+	if [ $(echo ${#pid1}) -gt 0 ]
+	then
+	taskset -cp 7 $pid1
+	s1=$(($(date +%s%N)/1000000))
+	poutput=`perf stat -B -e instructions  -C 7 sleep 0.1 2>&1`
+	echo $poutput
+	s2=$(($(date +%s%N)/1000000))
+	DIFF1b=$(($(( $s2 - $s1 ))))
+	v0="7':"
+	v7="instructions"
+	rest0=${poutput#*$v0}
+	rest7=${poutput#*$v7}
+	p0=$(( ${#poutput} - ${#rest0} - ${#v0} ))
+	p7=$(( ${#poutput} - ${#rest7} - ${#v7} ))
+	instructions1b=$(echo ${poutput:(p0+${#v0}-1):100}| cut -d ' ' -f 2)
+	instructions1b="$(echo "${instructions1b//,}")"
+	fi
+
+ips0="$(echo "scale=2; $(( $instructions0b*$DIFF0l ))/$(( $instructions0l*$DIFF0b ))" | bc)"
+ips1="$(echo "scale=2; $(( $instructions1b*$DIFF1l ))/$(( $instructions1l*$DIFF1b ))" | bc)"
+ips2="$(echo "scale=2; $(( $instructions2b*$DIFF2l ))/$(( $instructions2l*$DIFF2b ))" | bc)"
+ips3="$(echo "scale=2; $(( $instructions3b*$DIFF3l ))/$(( $instructions3l*$DIFF3b ))" | bc)"
+
+
+fishare="$(./minfair 0.98 $ips0 $ips1 $ips2 $ips3)"
+fisharearray=($fishare)
+f1roundtotal=${fisharearray[0]}
+f2roundtotal=${fisharearray[1]}
+f3roundtotal=${fisharearray[2]}
+f4roundtotal=${fisharearray[3]}
+
+s1roundtotal=$(( 66 - $f1roundtotal ))
+s2roundtotal=$(( 66 - $f2roundtotal ))
+s3roundtotal=$(( 66 - $f3roundtotal ))
+s4roundtotal=$(( 66 - $f4roundtotal ))
+
+if [ $pcnt -lt 3 ]
+then
+	f1roundtotal=66
+	f2roundtotal=66
+	f3roundtotal=66
+	f4roundtotal=66
+else
+	s1roundtotal=0
+	s2roundtotal=0
+	s3roundtotal=0
+	s4roundtotal=0
+fi
+
+f1round=0
+f2round=0
+f3round=0
+f4round=0
+s1round=0
+s2round=0
+s3round=0
+s4round=0
+#echo "$f1roundtotal $f2roundtotal $f3roundtotal $f4roundtotal $s1roundtotal $s2roundtotal $s3roundtotal $s4roundtotal"
+for ((i=1;i < 67;i++))
+{
+	s1=$(($(date +%s%N)/1000000))
+	
+	avablablebig=2
+	avablablelittle=2
+	p1=""
+	p2=""
+	p3=""
+	p4=""
+	
+	if [ $f1round -eq $f1roundtotal ] && [ $s1round -lt $s1roundtotal ] && [ $(echo ${#pid0}) -gt 0 ] && [ $pcnt -gt 2 ]
+	then
+		if [ $avablablelittle -lt 2 ]  
+		then
+			p1="taskset -cp 2 $pid0"
+			#p1="p1 on l1"
+		else
+			p1="taskset -cp 3 $pid0"
+			#p1="p1 on l0"
+		fi
+		
+		avablablelittle=$(( $avablablelittle - 1 ))
+		s1round=$(( $s1round + 1 )) 	
+	fi
+	if [ $f2round -eq $f2roundtotal ] && [ $s2round -lt $s2roundtotal ] && [ $(echo ${#pid1}) -gt 0 ] && [ $pcnt -gt 2 ]
+	then
+		if [ $avablablelittle -lt 2 ]  
+		then
+			p2="taskset -cp 2 $pid1"
+			#p2="p2 on l1"
+		else
+			p2="taskset -cp 3 $pid1"
+			#p2="p2 on l0"
+		fi
+		avablablelittle=$(( $avablablelittle - 1 ))
+		s2round=$(( $s2round + 1 )) 	
+	fi
+	if [ $f3round -eq $f3roundtotal ] && [ $s3round -lt $s3roundtotal ] && [ $(echo ${#pid2}) -gt 0 ] && [ $pcnt -gt 2 ] 
+	then
+		if [ $avablablelittle -lt 2 ]  
+		then
+			p3="taskset -cp 3 $pid2"
+			#p3="p3 on l1"
+		else
+			p3="taskset -cp 2 $pid2"
+			#p3="p3 on l0"
+		fi
+		avablablelittle=$(( $avablablelittle - 1 ))
+		s3round=$(( $s3round + 1 )) 	
+	fi
+	if [ $f4round -eq $f4roundtotal ] && [ $s4round -lt $s4roundtotal ] && [ $(echo ${#pid3}) -gt 0 ] && [ $pcnt -gt 2 ] 
+	then
+		if [ $avablablelittle -lt 2 ]  
+		then
+			p4="taskset -cp 3 $pid3"
+			#p4="p4 on l1"
+		else
+			p4="taskset -cp 2 $pid3"
+			#p4="p4 on l0"
+		fi
+		avablablelittle=$(( $avablablelittle - 1 ))
+		s4round=$(( $s4round + 1 )) 	
+	fi
+	
+	if [ $s1round -eq $s1roundtotal ] && [ $f1round -lt $f1roundtotal ] && [ $(echo ${#pid0}) -gt 0 ] 
+	then
+		if [ $avablablebig -lt 2 ]  
+		then
+			p1="taskset -cp 7 $pid0"
+			#p1="p1 on b1"
+		else
+			p1="taskset -cp 6 $pid0"
+			#p1="p1 on b0"
+		fi
+		avablablebig=$(( $avablablebig - 1 ))
+		f1round=$(( $f1round + 1 )) 	
+	fi
+	if [ $s2round -eq $s2roundtotal ] && [ $f2round -lt $f2roundtotal ] && [ $(echo ${#pid1}) -gt 0 ] 
+	then
+		if [ $avablablebig -lt 2 ]  
+		then
+			p2="taskset -cp 7 $pid1"
+			#p2="p2 on b1"
+		else
+			p2="taskset -cp 6 $pid1"
+			#p2="p2 on b0"
+		fi
+		avablablebig=$(( $avablablebig - 1 ))
+		f2round=$(( $f2round + 1 )) 	
+	fi
+	if [ $s3round -eq $s3roundtotal ] && [ $f3round -lt $f3roundtotal ] && [ $(echo ${#pid2}) -gt 0 ]
+	then
+		if [ $avablablebig -lt 2 ]  
+		then
+			p3="taskset -cp 7 $pid2"
+			#p3="p3 on b1"
+		else
+			p3="taskset -cp 6 $pid2"
+			#p3="p3 on b0"
+		fi
+		avablablebig=$(( $avablablebig - 1 ))
+		f3round=$(( $f3round + 1 )) 	
+	fi
+	if [ $s4round -eq $s4roundtotal ] && [ $f4round -lt $f4roundtotal ] && [ $(echo ${#pid3}) -gt 0 ]
+	then
+		if [ $avablablebig -lt 2 ]  
+		then
+			p4="taskset -cp 7 $pid3"
+			#p4="p4 on b1"
+		else
+			p4="taskset -cp 6 $pid3"
+			#p4="p4 on b0"
+		fi
+		avablablebig=$(( $avablablebig - 1 ))
+		f4round=$(( $f4round + 1 )) 	
+	fi	
+	
+	if [ ${#p1} -eq 0 ] && [ $(echo ${#pid0}) -gt 0 ]
+	then
+		if ([ $f1round -le $s1round ] && [ $f1round -lt $f1roundtotal ] && [ $avablablebig -gt 0 ]) || [ $avablablelittle -eq 0 ]  
+		then
+			if [ $avablablebig -lt 2 ]  
+			then
+				p1="taskset -cp 7 $pid0"
+				#p1="p1 on b1"
+			else
+				p1="taskset -cp 6 $pid0"
+				#p1="p1 on b0"
+			fi
+			avablablebig=$(( $avablablebig - 1 ))
+			f1round=$(( $f1round + 1 ))
+		else
+			if [ $avablablelittle -lt 2 ]  
+		then
+				p1="taskset -cp 3 $pid0"
+				#p1="p1 on l1"
+			else
+				p1="taskset -cp 2 $pid0"
+				#p1="p1 on l0"
+			fi
+			avablablelittle=$(( $avablablelittle - 1 ))
+			s1round=$(( $s1round + 1 ))
+		fi
+	fi
+	
+	if [ ${#p2} -eq 0 ] && [ $(echo ${#pid1}) -gt 0 ]
+	then
+	if ([ $f2round -le $s2round ] && [ $f2round -lt $f2roundtotal ] && [ $avablablebig -gt 0 ]) || [ $avablablelittle -eq 0 ] 
+	then
+		if [ $avablablebig -lt 2 ]  
+			then
+				p2="taskset -cp 7 $pid1"
+				#p2="p2 on b1"
+			else
+				p2="taskset -cp 6 $pid1"
+				#p2="p2 on b0"
+			fi
+		avablablebig=$(( $avablablebig - 1 ))
+		f2round=$(( $f2round + 1 ))
+	else
+		if [ $avablablelittle -lt 2 ]  
+		then
+				p2="taskset -cp 3 $pid1"
+				#p2="p2 on l1"
+			else
+				p2="taskset -cp 2 $pid1"
+				#p2="p2 on l0"
+			fi
+		avablablelittle=$(( $avablablelittle - 1 ))
+		s2round=$(( $s2round + 1 ))
+	fi	
+	fi
+	
+	if [ ${#p3} -eq 0 ] && [ $(echo ${#pid2}) -gt 0 ]
+	then
+	if ([ $f3round -le $s3round ] && [ $f3round -lt $f3roundtotal ] && [ $avablablebig -gt 0 ]) || [ $avablablelittle -eq 0 ] 
+	then
+		if [ $avablablebig -lt 2 ]  
+			then
+				p3="taskset -cp 7 $pid2"
+				#p3="p3 on b1"
+			else
+				p3="taskset -cp 6 $pid2"
+				#p3="p3 on b0"
+			fi
+		avablablebig=$(( $avablablebig - 1 ))
+		f3round=$(( $f3round + 1 ))
+	else
+		if [ $avablablelittle -lt 2 ]  
+		then
+				p3="taskset -cp 3 $pid2"
+				#p3="p3 on l1"
+			else
+				p3="taskset -cp 2 $pid2"
+				#p3="p3 on l0"
+			fi
+		avablablelittle=$(( $avablablelittle - 1 ))
+		s3round=$(( $s3round + 1 ))
+	fi	
+	fi	
+	
+	if [ ${#p4} -eq 0 ] && [ $(echo ${#pid3}) -gt 0 ]
+	then
+	if ([ $f4round -le $s4round ] && [ $f4round -lt $f4roundtotal ] && [ $avablablebig -gt 0 ]) || [ $avablablelittle -eq 0 ] 
+	then
+		if [ $avablablebig -lt 2 ]  
+			then
+				p4="taskset -cp 7 $pid3"
+				#p4="p4 on b1"
+			else
+				p4="taskset -cp 6 $pid3"
+				#p4="p4 on b0"
+			fi
+		avablablebig=$(( $avablablebig - 1 ))
+		f4round=$(( $f4round + 1 ))
+	else
+		if [ $avablablelittle -lt 2 ] 
+		then
+				p4="taskset -cp 3 $pid3"
+				#p4="p4 on l1"
+			else
+				p4="taskset -cp 2 $pid3"
+				#p4="p4 on l0"
+			fi
+		avablablelittle=$(( $avablablelittle - 1 ))
+		s4round=$(( $s4round + 1 ))
+	fi
+	fi
+	s2=$(($(date +%s%N)/1000000))
+	DIFF1=$(($(( $s2 - $s1 ))))
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+		$p1
+		echo $p1
+	fi
+	if [ $(echo ${#pid1}) -gt 0 ]
+	then
+		$p2
+		echo $p2
+	fi
+	if [ $(echo ${#pid2}) -gt 0 ]
+	then
+		$p3
+		echo $p3
+	fi
+	if [ $(echo ${#pid3}) -gt 0 ]
+	then
+		$p4
+		echo $p4
+	fi
+	s3=$(($(date +%s%N)/1000000))
+	DIFF2=$(($(( $s3 - $s2 ))))
+	echo "$pcnt $i $j $DIFF1 $DIFF2"
+
+
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU_GOVERNOR=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
+	CPU0_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone1/temp`
+	CPU1_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone2/temp`
+	CPU2_TEMP=$((`echo $TMU_FILE`/1000))
+	TMU_FILE=`cat /sys/devices/virtual/thermal/thermal_zone3/temp`
+	CPU3_TEMP=$((`echo $TMU_FILE`/1000))
+	A7_V=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_V`
+	A7_A=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_A`
+	A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+	A15_V=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_V`
+	A15_A=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_A`
+	A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+	FAN_SPEED=$((`cat /sys/devices/platform/pwm-fan/hwmon/hwmon0/pwm1` * 100 / 255))"%"
+	echo "${j} $(date +'%H:%M:%S') ${CPU0_FREQ} ${CPU4_FREQ} ${CPU0_TEMP} ${CPU1_TEMP} ${CPU2_TEMP} ${CPU3_TEMP}  ${A7_V} ${A7_A} ${A7_W} ${A15_V} ${A15_A} ${A15_W} -${pid0} -${pid1} -${pid2} -${pid3}" >> ressch1.log
+
+
+}
+
+
+
+
+
+
+	pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+	pid1="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+	pid2="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+	pid3="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+	pcnt=""
+	if [ $(echo ${#pid0}) -gt 0 ]
+	then
+		pcnt=$(( $pcnt + 1 ))	
+	fi
+	if [ $(echo ${#pid1}) -gt 0 ]
+	then
+		pcnt=$(( $pcnt + 1 ))
+	fi
+	if [ $(echo ${#pid2}) -gt 0 ]
+	then
+		pcnt=$(( $pcnt + 1 )) 
+	fi
+	if [ $(echo ${#pid3}) -gt 0 ]
+	then
+		pcnt=$(( $pcnt + 1 )) 
+	fi
+
+done
+

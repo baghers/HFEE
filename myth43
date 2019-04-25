@@ -1,0 +1,162 @@
+
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0045/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0040/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0041/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0044/enable
+
+echo userspace >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+frl=5
+
+cnt=0
+while [ $frl -lt 15 ]
+do
+	frb=5
+	while [ $frb -lt 19 ]
+	do
+			
+		frl1=$(( $frl*100000 ))
+		frb1=$(( $frb*100000 ))
+		echo $frl1 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+
+		echo $frl1 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+		
+		pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+		pid1="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+		pid2="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+		pid3="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+
+		#####################kill previous processes
+		if [ $(echo ${#pid0}) -gt 0 ]
+		then
+			kill $pid0
+		fi
+		if [ $(echo ${#pid1}) -gt 0 ]
+		then
+			kill $pid1
+		fi
+		if [ $(echo ${#pid2}) -gt 0 ]
+		then
+			kill $pid2
+		fi
+		if [ $(echo ${#pid3}) -gt 0 ]
+		then
+			kill $pid3
+		fi
+		#####################
+			
+		./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/hmmer_base.ArmLinuxGnuAbi-  --num 50000 ./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/nph3.hmm &	
+		t0=$(($(date +%s%N)/1000000))
+
+		./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/bzip2_base.ArmLinuxGnuAbi- ./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/input.program & 
+		t1=$(($(date +%s%N)/1000000))
+
+		./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/mcf_base.ArmLinuxGnuAbi- ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.in -o ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.out -e ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.err &
+		t2=$(($(date +%s%N)/1000000))
+
+		./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/h264ref_base.ArmLinuxGnuAbi- -d ./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/foreman_ref_encoder_main.cfg & 
+		t3=$(($(date +%s%N)/1000000))
+
+		pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+		pid1="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+		pid2="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+		pid3="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+
+		taskset -cp 6 $pid0
+		taskset -cp 2 $pid1
+		taskset -cp 3 $pid2
+		taskset -cp 7 $pid3
+		pcnt=4
+		dur0=0
+		dur1=0
+		dur2=0
+		dur3=0
+		prev=$t0
+		EDP=0
+		while [ $(echo ${#pcnt}) -gt 0 ]
+		do	
+			A7_W=`cat /sys/bus/i2c/drivers/INA231/0-0045/sensor_W`
+			A15_W=`cat /sys/bus/i2c/drivers/INA231/0-0040/sensor_W`
+			pid0="$(pidof hmmer_base.ArmLinuxGnuAbi-)"
+			pid1="$(pidof bzip2_base.ArmLinuxGnuAbi-)"
+			pid2="$(pidof mcf_base.ArmLinuxGnuAbi-)"
+			pid3="$(pidof h264ref_base.ArmLinuxGnuAbi-)"
+			pcnt=""
+			curt=$(($(date +%s%N)/1000000))
+			if [ $(echo ${#pid0}) -gt 0 ]
+			then
+				pcnt=$(( $pcnt + 1 ))			
+				dur0=$(( $curt-$t0 ))
+			fi
+			if [ $(echo ${#pid1}) -gt 0 ]
+			then
+				pcnt=$(( $pcnt + 1 ))
+				dur1=$(( $curt-$t1 ))
+			fi
+			if [ $(echo ${#pid2}) -gt 0 ]
+			then
+				pcnt=$(( $pcnt + 1 )) 
+				dur2=$(( $curt-$t2 ))
+			fi
+			if [ $(echo ${#pid3}) -gt 0 ]
+			then
+				pcnt=$(( $pcnt + 1 )) 
+				dur3=$(( $curt-$t3 ))
+			fi
+			##echo "EDP1=$EDP" 
+			curedp=$(echo "scale=2; $(echo "scale=2; $(( $curt-$prev ))/1000" | bc)*$(echo "scale=2; $A7_W+$A15_W" | bc)" | bc)
+			EDP=$(echo "scale=2; $EDP+$curedp" | bc)
+			prev=$curt
+			sleep 1s
+			
+			##CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+			##CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+			##echo "$cnt ${frl} ${frb} ${CPU0_FREQ} ${CPU4_FREQ} ${EDP} ${dur0} ${dur1} ${dur2} ${dur3}"
+		done
+		CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+		CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+		cnt=$(( $cnt + 1 ))
+		echo "$cnt ${frl} ${frb} ${CPU0_FREQ} ${CPU4_FREQ} ${EDP} ${dur0} ${dur1} ${dur2} ${dur3}" >> res43.log
+		frb=$(( $frb + 1 ))
+	done
+	frb=5
+		frb1=$(( $frb*100000 ))
+		echo $frl1 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+
+		echo $frl1 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+		echo $frl1 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+		echo $frb1 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+	frl=$(( $frl + 1 ))
+done
