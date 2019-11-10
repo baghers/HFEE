@@ -1,0 +1,36 @@
+appnae1="bzip2_base.ArmLinuxGnuAbi-"
+appnae2="gamess_base.arm"
+appnae3="calculix_base.arm"
+appnae4="Xalan_base.arm"
+appnae5="tonto_base.arm"
+appnae6="zeusmp_base.arm"
+
+pid0="$(pidof ${appnae1})"
+pid1="$(pidof ${appnae2})"
+pid2="$(pidof ${appnae3})"
+pid3="$(pidof ${appnae4})"
+pid4="$(pidof ${appnae5})"
+pid5="$(pidof ${appnae6})"
+
+
+usedcores0="$(ps -fp ${pid0} -o psr= | sort | uniq)"
+usedcores1="$(ps -fp ${pid1} -o psr= | sort | uniq)"
+usedcores2="$(ps -fp ${pid2} -o psr= | sort | uniq)"
+usedcores3="$(ps -fp ${pid3} -o psr= | sort | uniq)"
+usedcores4="$(ps -fp ${pid4} -o psr= | sort | uniq)"
+usedcores5="$(ps -fp ${pid5} -o psr= | sort | uniq)"
+cnt1=1
+while [ $(echo ${#usedcores0}) -gt 0 ] || [ $(echo ${#usedcores1}) -gt 0 ] || [ $(echo ${#usedcores2}) -gt 0 ] || [ $(echo ${#usedcores3}) -gt 0 ] || [ $(echo ${#usedcores4}) -gt 0 ] || [ $(echo ${#usedcores5}) -gt 0 ]
+do	
+	usedcores0="$(ps -fp ${pid0} -o psr= | sort | uniq)"
+	usedcores1="$(ps -fp ${pid1} -o psr= | sort | uniq)"
+	usedcores2="$(ps -fp ${pid2} -o psr= | sort | uniq)"
+	usedcores3="$(ps -fp ${pid3} -o psr= | sort | uniq)"
+	usedcores4="$(ps -fp ${pid4} -o psr= | sort | uniq)"
+	usedcores5="$(ps -fp ${pid5} -o psr= | sort | uniq)"
+	CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+	CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+	echo "$CPU0_FREQ $CPU4_FREQ -$usedcores0 -$usedcores1 -$usedcores2 -$usedcores3 -$usedcores4 -$usedcores5"
+	echo "$CPU0_FREQ $CPU4_FREQ -$usedcores0 -$usedcores1 -$usedcores2 -$usedcores3 -$usedcores4 -$usedcores5" >> salamioutput/resmonitor.log
+		sleep 1s
+done

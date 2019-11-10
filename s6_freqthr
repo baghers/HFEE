@@ -1,0 +1,389 @@
+
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0045/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0040/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0041/enable
+echo 1 > /sys/bus/i2c/drivers/INA231/0-0044/enable
+
+echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+echo 2
+echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+echo 2000000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+echo 3
+echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+echo 2000000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+echo 4
+cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq
+j=1
+while [ $j -lt 7 ]
+do
+	cnt=1
+	while [ $cnt -lt 29 ]
+	do
+		if [ $cnt -eq 1 ]
+		then
+			appnae1="gcc_base.arm"
+			./spec/CPU2006/403.gcc/gcc_base.arm spec/CPU2006/403.gcc/200.i -o spec/CPU2006/403.gcc/200.s > spec/CPU2006/403.gcc/gcc.ref.200.out 2> spec/CPU2006/403.gcc/gcc.ref.200.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 2 ]
+		then
+		appnae1="perlbench_base.ArmLinuxGnuAbi-"
+		./spec/CPU2006/400.perlbench/perlbench_base.ArmLinuxGnuAbi- -I./spec/CPU2006/400.perlbench/lib spec/CPU2006/400.perlbench/checkspam.pl 2500 5 25 11 150 1 1 1 1 > spec/CPU2006/400.perlbench/perlbench.ref.checkspam.out 2> spec/CPU2006/400.perlbench/perlbench.ref.checkspam.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 3 ]
+			then
+		appnae1="bzip2_base.ArmLinuxGnuAbi-"
+		./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/bzip2_base.ArmLinuxGnuAbi- ./spec/CPU2006/401.bzip2/run/run_base_ref_ArmLinuxGnuAbi-.0000/input.program &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 4 ]
+			then
+			appnae1="mcf_base.ArmLinuxGnuAbi-"
+		./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/mcf_base.ArmLinuxGnuAbi- ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.in -o ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.out -e ./spec/CPU2006/429.mcf/run/run_base_ref_ArmLinuxGnuAbi-.0000/inp.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 5 ]
+			then
+		appnae1="hmmer_base.ArmLinuxGnuAbi-"
+		./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/hmmer_base.ArmLinuxGnuAbi-  --num 50000 ./spec/CPU2006/456.hmmer/run/run_base_ref_ArmLinuxGnuAbi-.0000/nph3.hmm &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 6 ]
+			then
+		appnae1="h264ref_base.ArmLinuxGnuAbi-"
+		./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/h264ref_base.ArmLinuxGnuAbi- -d ./spec/CPU2006/464.h264ref/run/run_base_ref_ArmLinuxGnuAbi-.0000/foreman_ref_encoder_main.cfg &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 7 ]
+			then
+		appnae1="milc_base.arm"
+		./spec/CPU2006/433.milc/milc_base.arm < spec/CPU2006/433.milc/su3imp.in > spec/CPU2006/433.milc/milc.ref.out 2> spec/CPU2006/433.milc/milc.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 8 ]
+			then
+		appnae1="cactusADM_base.arm"
+		./spec/CPU2006/436.cactusADM/cactusADM_base.arm spec/CPU2006/436.cactusADM/benchADM.par > spec/CPU2006/436.cactusADM/cactusADM.ref.out 2> spec/CPU2006/436.cactusADM/cactusADM.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 9 ]
+			then
+		appnae1="leslie3d_base.arm"
+		./spec/CPU2006/437.leslie3d/leslie3d_base.arm < spec/CPU2006/437.leslie3d/leslie3d.in > spec/CPU2006/437.leslie3d/leslie3d.ref.out 2> spec/CPU2006/437.leslie3d/leslie3d.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 10 ]
+			then
+		appnae1="namd_base.arm"
+		./spec/CPU2006/444.namd/namd_base.arm --input spec/CPU2006/444.namd/namd.input --iterations 1 --output spec/CPU2006/444.namd/namd.out > spec/CPU2006/444.namd/namd.ref.out 2> spec/CPU2006/444.namd/namd.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 11 ]
+			then
+		appnae1="gobmk_base.arm"
+		./spec/CPU2006/445.gobmk/gobmk_base.arm --quiet --mode gtp < spec/CPU2006/445.gobmk/dniwog.tst > spec/CPU2006/445.gobmk/gobmk.reff.score2.out 2> spec/CPU2006/445.gobmk/gobmk.ref.score2.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 12 ]
+			then
+		appnae1="soplex_base.arm"
+		./spec/CPU2006/450.soplex/soplex_base.arm -s1 -e -m15000 spec/CPU2006/450.soplex/pds-20.mps > spec/CPU2006/450.soplex/soplex.ref.pds-20.out 2> spec/CPU2006/450.soplex/soplex.ref.pds20.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 13 ]
+			then
+		appnae1="sjeng_base.arm"
+		./spec/CPU2006/458.sjeng/sjeng_base.arm spec/CPU2006/458.sjeng/ref.txt > spec/CPU2006/458.sjeng/sjeng.ref.out 2> spec/CPU2006/458.sjeng/sjeng.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 14 ]
+			then
+		appnae1="libquantum_base.arm"
+		./spec/CPU2006/462.libquantum/libquantum_base.arm 250 8 > spec/CPU2006/462.libquantum/libquantum.ref.out 2> spec/CPU2006/462.libquantum/libquantum.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 15 ]
+			then
+		appnae1="lbm_base.arm"
+		./spec/CPU2006/470.lbm/lbm_base.arm 30 spec/CPU2006/470.lbm/reference.dat 0 0 spec/CPU2006/470.lbm/100_100_130_ldc.of > spec/CPU2006/470.lbm/lbm.ref.out 2> spec/CPU2006/470.lbm/lbm.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 16 ]
+			then
+		appnae1="astar_base.arm"
+		./spec/CPU2006/473.astar/astar_base.arm spec/CPU2006/473.astar/lake.cfg > spec/CPU2006/473.astar/astar.out 2> spec/CPU2006/473.astar/astar.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 17 ]
+			then
+		appnae1="bwaves_base.arm"
+		./spec/CPU2006/410.bwaves/bwaves_base.arm bwaves.in > bwaves.out 2> bwaves.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 18 ]
+			then
+		appnae1="gamess_base.arm"
+		./spec/CPU2006/416.gamess/gamess_base.arm < spec/CPU2006/416.gamess/cytosine.2.config > gamess.ref.cytosine.out 2> gamess.ref.cytosine.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 19 ]
+			then
+		appnae1="zeusmp_base.arm"
+		./spec/CPU2006/434.zeusmp/zeusmp_base.arm > zeusmp.ref.out 2> zeusmp.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 20 ]
+			then
+			appnae1="gromacs"
+		./spec/CPU2006/435.gromacs/gromacs -silent -deffnm gromacs -nice 0 > gromacs.ref.out 2> gromacs.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 21 ]
+			then
+		appnae1="povray_base.arm"
+		./spec/CPU2006/453.povray/povray_base.arm spec/CPU2006/453.povray/SPEC-benchmark-ref.ini > povray.ref.out 2> povray.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 22 ]
+			then
+		appnae1="calculix_base.arm"
+		./spec/CPU2006/454.calculix/calculix_base.arm -i stairs > calculix.ref.out 2> calculix.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 23 ]
+			then
+		appnae1="GemsFDTD_base.arm"
+		./spec/CPU2006/459.GemsFDTD/GemsFDTD_base.arm > spec/CPU2006/459.GemsFDTD/GemsFDTD.ref.out 2> spec/CPU2006/459.GemsFDTD/GemsFDTD.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 24 ]
+			then
+		appnae1="tonto_base.arm"
+		./spec/CPU2006/465.tonto/tonto_base.arm > spec/CPU2006/465.tonto/tonto.ref.out 2> spec/CPU2006/465.tonto/tonto.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 25 ]
+			then
+		appnae1="omnetpp_base.arm"
+		./spec/CPU2006/471.omnetpp/omnetpp_base.arm spec/CPU2006/471.omnetpp/omnetpp.ini > spec/CPU2006/471.omnetpp/omnetpp.ref.log 2> spec/CPU2006/471.omnetpp/omnpp.ref.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 26 ]
+			then
+		appnae1="Xalan_base.arm"
+		./spec/CPU2006/483.xalancbmk/Xalan_base.arm -v spec/CPU2006/483.xalancbmk/test.xml spec/CPU2006/483.xalancbmk/xalanc.xsl &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 27 ]
+			then
+		appnae1="specrand_base.arm"
+		./spec/CPU2006/998.specrand/specrand_base.arm 9242 39332 spec/CPU2006/998.specrand/res.out 2> spec/CPU2006/998.specrand/res.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		if [ $cnt -eq 28 ]
+			then
+		appnae1="specrand999"
+		./spec/CPU2006/999.specrand/specrand999 9242 39332 spec/CPU2006/999.specrand/res.out 2> spec/CPU2006/999.specrand/res.err &
+				t0=$(($(date +%s%N)/1000000))
+		fi
+		pid0="$(pidof ${appnae1})"
+		if [ $j -eq 1 ]
+		then
+			echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+			echo 2
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+			echo 2000000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+			echo 2000000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+			echo 2000000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+			echo 2000000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+			echo 3
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+			echo 2000000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+			echo 2000000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+			echo 2000000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+			echo 2000000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+			echo 4
+			taskset -cp 3 $pid0
+		fi
+		if [ $j -eq 2 ]
+		then
+			echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+			echo 2
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+			echo 1200000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+			echo 1200000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+			echo 1200000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+			echo 1200000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+			echo 3
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+			echo 1200000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+			echo 1200000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+			echo 1200000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+			echo 1200000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+			echo 4
+			taskset -cp 7 $pid0
+		fi
+		if [ $j -eq 3 ]
+		then
+			echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+			echo 2
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+			echo 1300000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+			echo 1300000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+			echo 1300000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+			echo 1300000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+			echo 3
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+			echo 1300000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+			echo 1300000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+			echo 1300000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+			echo 1300000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+			echo 4
+			taskset -cp 7 $pid0
+		fi
+		if [ $j -eq 4 ]
+		then
+			echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+			echo 2
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+			echo 3
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+			echo 4
+			taskset -cp 7 $pid0
+		fi
+		if [ $j -eq 5 ]
+		then
+			echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+			echo 2
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+			echo 1500000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+			echo 1500000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+			echo 1500000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+			echo 1500000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+			echo 3
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+			echo 1500000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+			echo 1500000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+			echo 1500000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+			echo 1500000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+			echo 4
+			taskset -cp 7 $pid0
+		fi
+		if [ $j -eq 6 ]
+		then
+			echo userspace >/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu5/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+			echo userspace >/sys/devices/system/cpu/cpu7/cpufreq/scaling_governor
+			echo 2
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+			echo 1600000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+			echo 1600000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+			echo 1600000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+			echo 1600000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+			echo 3
+			echo 1400000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+			echo 1400000 >/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+			echo 1600000 >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+			echo 1600000 >/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+			echo 1600000 >/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+			echo 1600000 >/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+			echo 4
+			taskset -cp 7 $pid0
+		fi
+		while [ $(echo ${#pid0}) -gt 0 ]
+		do	
+			pid0="$(pidof ${appnae1})"
+			curt=$(($(date +%s%N)/1000000))
+			totaldur0=$(($(( $curt - t0 ))))
+			sleep 1s
+		done
+		CPU0_FREQ=$((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`/1000))
+		CPU4_FREQ=$((`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`/1000))
+		echo " $j $cnt  ${CPU0_FREQ} ${CPU4_FREQ} ${totaldur0} $appnae1" >> salamioutput/resfreqthr.log
+		cnt=$(( $cnt + 1 ))
+	done
+	j=$(( $j + 1 ))
+done
+
