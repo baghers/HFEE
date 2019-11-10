@@ -16,8 +16,8 @@ float uniformity(float data[], int n)
 }
 void main(int argc, char **argv)
 {
-	int i,m=4;
-    float data[4];
+	int i,m=40;
+    float data[40];
   	m=atoi(argv[1]);
       for(i=0; i<m;i++)
     {
